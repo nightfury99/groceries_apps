@@ -1,7 +1,9 @@
 package com.rajendra.onlinedailygroceries;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -9,11 +11,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.paypal.android.sdk.payments.PayPalConfiguration;
 import com.paypal.android.sdk.payments.PayPalPayment;
 import com.paypal.android.sdk.payments.PayPalService;
 import com.paypal.android.sdk.payments.PaymentActivity;
+import com.paypal.android.sdk.payments.PaymentConfirmation;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.math.BigDecimal;
 
@@ -91,10 +98,56 @@ public class ProductDetails extends AppCompatActivity {
 
             }
         });
-
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PAYPAL_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                PaymentConfirmation confirmation = data.getParcelableExtra(PaymentActivity.EXTRA_RESULT_CONFIRMATION);
+                if(confirmation != null) {
+                    try {
+                        String paymentDetail = confirmation.toJSONObject().toString(Integer.parseInt("4"));
+                        JSONObject jsonObject = new JSONObject(paymentDetail);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }else if(resultCode == Activity.RESULT_CANCELED) {
+                Toast.makeText(this, "Payment Cancel", Toast.LENGTH_SHORT).show();
+            } else if (resultCode == PaymentActivity.RESULT_EXTRAS_INVALID) {
+                Toast.makeText(this, "Invalid Payment", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
 
-   // this tutorial has been completed
+    // this tutorial has been completed
     // see you in the next.
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
